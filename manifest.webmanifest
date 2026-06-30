@@ -1,0 +1,1 @@
+{"name":"Diamond Organizer","short_name":"Diamonds","description":"Organize your diamond inventory","start_url":"/diamond-organizer/","display":"standalone","background_color":"#0f172a","theme_color":"#0f172a","lang":"en","scope":"/diamond-organizer/","icons":[{"src":"icon.png","sizes":"192x192 512x512","type":"image/png","purpose":"any maskable"}]}

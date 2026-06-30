@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/diamond-organizer/sw.js', { scope: '/diamond-organizer/' })})}
