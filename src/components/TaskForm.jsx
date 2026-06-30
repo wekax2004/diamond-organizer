@@ -14,7 +14,7 @@ const emptyStone = () => ({
   certNumber: '',
   buyPrice: '',
   sellPrice: '',
-  image: null
+  images: []
 });
 
 const emptyForm = () => ({
@@ -34,7 +34,13 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
 
   useEffect(() => {
     if (editingTask) {
-      setFormData(editingTask);
+      // Migrate legacy single image to images array for the form
+      const migratedStones = editingTask.stones.map(s => {
+        const imgs = s.images ? [...s.images] : [];
+        if (s.image && imgs.length === 0) imgs.push(s.image);
+        return { ...s, images: imgs };
+      });
+      setFormData({ ...editingTask, stones: migratedStones });
     } else {
       setFormData(emptyForm());
     }
@@ -75,15 +81,12 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
       if (apiKey) {
         const extractedStones = await parseFreeTextWithGemini(freeText, apiKey);
         
-        // Use the first stone's details for general info if needed, or extract general info from the first stone
         const stones = extractedStones.map(s => ({
           ...emptyStone(),
           ...s
         }));
         
         const firstStone = stones[0] || {};
-        
-        // Generate title based on first stone if multiple, or a generic title
         const generatedTitle = stones.length === 1 
           ? [firstStone.size ? `${firstStone.size}ct` : '', firstStone.shape, firstStone.color, firstStone.clarity].filter(Boolean).join(' ') || 'New Diamond Task'
           : `${stones.length} Diamonds Task`;
@@ -97,7 +100,6 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
           stones: stones
         }));
       } else {
-        // Fallback to old regex parser if no key
         const parsedData = parseFreeText(freeText);
         setFormData(prev => ({
           ...prev,
@@ -128,26 +130,38 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
   };
 
   const handleImageChange = async (stoneId, e) => {
-    const file = e.target.files[0];
-    if (file) {
-      try {
-        const base64 = await fileToBase64(file);
-        setFormData(prev => ({
-          ...prev,
-          stones: prev.stones.map(s => s.id === stoneId ? { ...s, image: base64 } : s)
-        }));
-      } catch (err) {
-        console.error("Error converting image:", err);
-      }
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
+    
+    try {
+      const base64Promises = files.map(file => fileToBase64(file));
+      const newImages = await Promise.all(base64Promises);
+      
+      setFormData(prev => ({
+        ...prev,
+        stones: prev.stones.map(s => 
+          s.id === stoneId 
+            ? { ...s, images: [...(s.images || []), ...newImages] } 
+            : s
+        )
+      }));
+    } catch (err) {
+      console.error("Error converting images:", err);
     }
   };
 
-  const removeImage = (stoneId) => {
+  const removeImage = (stoneId, imgIndex) => {
     setFormData(prev => ({
       ...prev,
-      stones: prev.stones.map(s => s.id === stoneId ? { ...s, image: null } : s)
+      stones: prev.stones.map(s => {
+        if (s.id === stoneId) {
+           const newImages = [...s.images];
+           newImages.splice(imgIndex, 1);
+           return { ...s, images: newImages };
+        }
+        return s;
+      })
     }));
-    if (fileInputRefs.current[stoneId]) fileInputRefs.current[stoneId].value = '';
   };
 
   const handleSubmit = (e) => {
@@ -284,33 +298,37 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
               </div>
 
               <div className="form-group">
-                <label>Attach Picture for Stone #{index + 1}</label>
+                <label>Attach Pictures & Certificates for Stone #{index + 1}</label>
                 <input 
                   type="file" 
                   accept="image/*" 
+                  multiple
+                  capture="environment"
                   onChange={(e) => handleImageChange(stone.id, e)} 
                   ref={el => fileInputRefs.current[stone.id] = el}
                   style={{ display: 'none' }}
                 />
                 
-                {stone.image ? (
-                  <div style={{ position: 'relative' }}>
-                    <img src={stone.image} alt="Preview" className="image-preview" style={{ height: '150px' }} />
-                    <button 
-                      type="button" 
-                      className="danger" 
-                      style={{ position: 'absolute', top: '10px', right: '10px', padding: '0.5rem' }}
-                      onClick={() => removeImage(stone.id)}
-                    >
-                      <X size={16} />
-                    </button>
-                  </div>
-                ) : (
-                  <div className="image-upload-area" style={{ padding: '1rem' }} onClick={() => fileInputRefs.current[stone.id]?.click()}>
-                    <ImageIcon size={24} style={{ color: 'var(--text-muted)' }} />
-                    <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Upload stone image</p>
-                  </div>
-                )}
+                <div style={{ display: 'flex', gap: '1rem', flexWrap: 'wrap', marginBottom: '1rem' }}>
+                  {(stone.images || []).map((img, imgIdx) => (
+                    <div key={imgIdx} style={{ position: 'relative' }}>
+                      <img src={img} alt="Preview" className="image-preview" style={{ height: '100px', width: '100px', objectFit: 'cover', margin: 0 }} />
+                      <button 
+                        type="button" 
+                        className="danger" 
+                        style={{ position: 'absolute', top: '5px', right: '5px', padding: '0.2rem', background: 'rgba(0,0,0,0.5)' }}
+                        onClick={() => removeImage(stone.id, imgIdx)}
+                      >
+                        <X size={14} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+                
+                <div className="image-upload-area" style={{ padding: '1rem' }} onClick={() => fileInputRefs.current[stone.id]?.click()}>
+                  <ImageIcon size={24} style={{ color: 'var(--text-muted)' }} />
+                  <p style={{ margin: '0.5rem 0 0 0', color: 'var(--text-muted)', fontSize: '0.85rem' }}>Upload or Take Photo</p>
+                </div>
               </div>
             </div>
           ))}

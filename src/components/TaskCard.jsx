@@ -21,7 +21,15 @@ const TaskCard = ({ task, onToggleStatus, onDelete, onEdit }) => {
         <div key={stone.id} style={{ marginBottom: '1.5rem', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px' }}>
           <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-muted)' }}>Stone {task.stones.length > 1 ? `#${idx + 1}` : ''}</h4>
           
-          {stone.image && (
+          {stone.images && stone.images.length > 0 ? (
+            <div style={{ display: 'flex', gap: '0.5rem', overflowX: 'auto', paddingBottom: '0.5rem', marginBottom: '0.5rem' }}>
+              {stone.images.map((img, i) => (
+                <div key={i} className="task-image-container" style={{ flex: '0 0 auto', width: '150px', height: '150px', margin: 0 }}>
+                  <img src={img} alt={`Diamond ${i + 1}`} className="task-image" />
+                </div>
+              ))}
+            </div>
+          ) : stone.image && (
             <div className="task-image-container" style={{ height: '120px' }}>
               <img src={stone.image} alt="Diamond" className="task-image" />
             </div>

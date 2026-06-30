@@ -80,6 +80,44 @@ const Dashboard = () => {
   const activeTasks = tasks.filter(t => !t.completed);
   const completedTasks = tasks.filter(t => t.completed);
 
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filterTasks = (taskList) => {
+    if (!searchTerm.trim()) return taskList;
+    const lower = searchTerm.toLowerCase();
+    return taskList.filter(task => {
+      const matchTitle = task.title?.toLowerCase().includes(lower);
+      const matchCustomer = task.customer?.toLowerCase().includes(lower);
+      const matchSeller = task.seller?.toLowerCase().includes(lower);
+      const matchNote = task.note?.toLowerCase().includes(lower);
+      const matchStones = task.stones?.some(stone => 
+        stone.certNumber?.toLowerCase().includes(lower) ||
+        stone.shape?.toLowerCase().includes(lower) ||
+        stone.color?.toLowerCase().includes(lower) ||
+        stone.clarity?.toLowerCase().includes(lower) ||
+        stone.buyPrice?.toLowerCase().includes(lower) ||
+        stone.sellPrice?.toLowerCase().includes(lower)
+      );
+      return matchTitle || matchCustomer || matchSeller || matchNote || matchStones;
+    });
+  };
+
+  const activeTasksFiltered = filterTasks(activeTasks);
+  const completedTasksFiltered = filterTasks(completedTasks);
+
+  const calculateTotals = () => {
+    let buy = 0;
+    let sell = 0;
+    activeTasksFiltered.forEach(task => {
+      task.stones?.forEach(stone => {
+        if (stone.buyPrice) buy += parseFloat(stone.buyPrice.toString().replace(/,/g, '')) || 0;
+        if (stone.sellPrice) sell += parseFloat(stone.sellPrice.toString().replace(/,/g, '')) || 0;
+      });
+    });
+    return { buy, sell, profit: sell - buy };
+  };
+  const stats = calculateTotals();
+
   return (
     <div>
       <header className="app-header">
@@ -121,11 +159,40 @@ const Dashboard = () => {
 
         {/* Right Column: Task Lists */}
         <div>
-          {activeTasks.length > 0 && (
+          {/* Stats Panel */}
+          <div className="glass-panel flex-row" style={{ marginBottom: '1.5rem', padding: '1rem 1.5rem', justifyContent: 'space-between' }}>
+            <div className="stat-box">
+              <div className="stat-label">Inventory Cost</div>
+              <div className="stat-value">${stats.buy.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+            </div>
+            <div className="stat-box">
+              <div className="stat-label">Expected Revenue</div>
+              <div className="stat-value">${stats.sell.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
+            </div>
+            <div className="stat-box">
+              <div className="stat-label">Est. Profit</div>
+              <div className="stat-value" style={{ color: stats.profit >= 0 ? '#34d399' : '#f87171' }}>
+                ${stats.profit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+              </div>
+            </div>
+          </div>
+
+          {/* Search Bar */}
+          <div style={{ marginBottom: '2rem' }}>
+            <input 
+              type="text" 
+              placeholder="Search by shape, color, cert #, customer..." 
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="search-input"
+            />
+          </div>
+
+          {activeTasksFiltered.length > 0 ? (
             <div style={{ marginBottom: '2rem' }}>
-              <h2>Active Tasks ({activeTasks.length})</h2>
+              <h2>Active Tasks ({activeTasksFiltered.length})</h2>
               <div className="tasks-grid">
-                {activeTasks.map(task => (
+                {activeTasksFiltered.map(task => (
                   <TaskCard 
                     key={task.id} 
                     task={task} 
@@ -136,9 +203,11 @@ const Dashboard = () => {
                 ))}
               </div>
             </div>
+          ) : searchTerm && (
+             <div style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>No active tasks match your search.</div>
           )}
 
-          {completedTasks.length > 0 && (
+          {completedTasksFiltered.length > 0 && (
             <div>
               <h2 style={{ color: 'var(--text-muted)' }}>Completed ({completedTasks.length})</h2>
               <div className="tasks-grid">
