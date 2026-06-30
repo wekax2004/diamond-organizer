@@ -7,7 +7,7 @@ import { auth } from '../utils/firebase';
 const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
-  const [showAddForm, setShowAddForm] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(window.innerWidth >= 1024);
 
   // Subscribe to tasks on mount
   useEffect(() => {
