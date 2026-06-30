@@ -1,11 +1,14 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { parseFreeText, parseFreeTextWithGemini } from '../utils/parser';
 import { fileToBase64 } from '../utils/storage';
+import { doc, getDoc } from 'firebase/firestore';
+import { db } from '../utils/firebase';
 import { Image as ImageIcon, Sparkles, X, Plus } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 
 const emptyStone = () => ({
   id: uuidv4(),
+  lotName: '',
   size: '',
   shape: '',
   color: '',
@@ -124,6 +127,41 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
     } catch (err) {
       console.error(err);
       alert("Error parsing text. Please try manual entry.");
+    } finally {
+      setIsParsing(false);
+    }
+  };
+
+  const handleCatalogSearch = async (stoneId, lotName) => {
+    if (!lotName || !lotName.trim()) return;
+    setIsParsing(true);
+    try {
+      const docRef = doc(db, 'catalog', lotName.trim());
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        setFormData(prev => ({
+          ...prev,
+          stones: prev.stones.map(s => {
+            if (s.id === stoneId) {
+              return {
+                ...s,
+                shape: data.Shape || data.shape || s.shape,
+                size: data.K_Weight || data.size || s.size,
+                color: data.Quality || data.color || s.color,
+                buyPrice: data['Total H Cost'] || data.buyPrice || s.buyPrice,
+                sellPrice: data['Sale Price'] || data['Total Sale'] || data.sellPrice || s.sellPrice,
+              };
+            }
+            return s;
+          })
+        }));
+      } else {
+        alert(`Lot ${lotName} not found in Catalog. Did you upload the latest Excel file?`);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Error searching catalog.');
     } finally {
       setIsParsing(false);
     }
@@ -254,6 +292,28 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
                 {formData.stones.length > 1 && (
                   <button type="button" className="danger" onClick={() => removeStone(stone.id)} style={{ padding: '0.2rem 0.5rem', fontSize: '0.8rem' }}>Remove</button>
                 )}
+              </div>
+
+              <div className="form-group" style={{ background: 'rgba(99, 102, 241, 0.1)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
+                <label style={{ color: 'var(--primary-color)' }}>Auto-Fill from Excel Catalog</label>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <input 
+                    type="text" 
+                    name="lotName" 
+                    value={stone.lotName || ''} 
+                    onChange={(e) => handleStoneChange(stone.id, e)} 
+                    placeholder="Enter Lot Name (e.g. BR7370)" 
+                    style={{ flex: 1, background: 'rgba(0,0,0,0.2)' }}
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => handleCatalogSearch(stone.id, stone.lotName)}
+                    disabled={isParsing || !stone.lotName}
+                    style={{ padding: '0 1rem', whiteSpace: 'nowrap' }}
+                  >
+                    {isParsing ? 'Searching...' : 'Search Catalog'}
+                  </button>
+                </div>
               </div>
 
               <div className="flex-row">
