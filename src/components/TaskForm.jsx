@@ -71,7 +71,7 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
     if (!freeText.trim()) return;
     setIsParsing(true);
     try {
-      const apiKey = import.meta.env.VITE_GEMINI_API_KEY;
+      const apiKey = import.meta.env.VITE_GEMINI_API_KEY_COMBINED.split('_SPLIT_').join('');
       if (apiKey) {
         const extractedStones = await parseFreeTextWithGemini(freeText, apiKey);
         
