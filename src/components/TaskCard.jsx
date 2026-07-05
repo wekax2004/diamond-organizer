@@ -36,6 +36,7 @@ const TaskCard = ({ task, onToggleStatus, onDelete, onEdit }) => {
           )}
 
           <div className="task-badges" style={{ marginBottom: '0.5rem' }}>
+            {parseInt(stone.quantity) > 1 && <span className="badge" style={{ background: 'var(--primary-color)' }}>Qty: {stone.quantity}</span>}
             {stone.shape && <span className="badge">{stone.shape}</span>}
             {stone.size && <span className="badge">{stone.size} ct</span>}
             {stone.color && <span className="badge">Color: {stone.color}</span>}

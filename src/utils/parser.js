@@ -135,7 +135,9 @@ export const parseFreeText = (text) => {
 export const parseFreeTextWithGemini = async (text, apiKey) => {
   const prompt = `You are an expert diamond industry assistant. I will give you a free-text input describing a task involving one or more diamonds.
 Extract all diamonds mentioned into a JSON array of objects.
+IMPORTANT: If the user specifies multiple quantities of the same exact stone (e.g. "5 round diamonds"), DO NOT create 5 separate objects. Instead, create 1 object and set the "quantity" field to "5".
 Each object should have these string fields (leave empty string if not found, DO NOT invent values):
+- quantity (default to "1")
 - size (e.g. "1.5-2.0", "1")
 - shape (e.g. "Round", "Oval")
 - color (e.g. "D-F", "I")
@@ -151,7 +153,7 @@ Input: "${text}"
 
 Return ONLY a valid JSON array. Do not include markdown blocks like \`\`\`json. E.g.
 [
-  { "size": "1", "shape": "Round", "color": "D", "clarity": "VS1", "cut": "", "buyPrice": "5000", "sellPrice": "", "seller": "John", "customer": "Guy", "certNumber": "" }
+  { "quantity": "1", "size": "1", "shape": "Round", "color": "D", "clarity": "VS1", "cut": "", "buyPrice": "5000", "sellPrice": "", "seller": "John", "customer": "Guy", "certNumber": "" }
 ]`;
 
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {

@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 const emptyStone = () => ({
   id: uuidv4(),
   lotName: '',
+  quantity: '1',
   size: '',
   shape: '',
   color: '',
@@ -90,9 +91,10 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
         }));
         
         const firstStone = stones[0] || {};
-        const generatedTitle = stones.length === 1 
+        const totalQuantity = stones.reduce((acc, s) => acc + (parseInt(s.quantity) || 1), 0);
+        const generatedTitle = stones.length === 1 && totalQuantity === 1
           ? [firstStone.size ? `${firstStone.size}ct` : '', firstStone.shape, firstStone.color, firstStone.clarity].filter(Boolean).join(' ') || 'New Diamond Task'
-          : `${stones.length} Diamonds Task`;
+          : `${totalQuantity} Diamonds Task`;
 
         setFormData(prev => ({
           ...prev,
@@ -317,6 +319,10 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
               </div>
 
               <div className="flex-row">
+                <div className="form-group" style={{ flex: '0.5' }}>
+                  <label>Qty</label>
+                  <input type="text" name="quantity" value={stone.quantity || '1'} onChange={(e) => handleStoneChange(stone.id, e)} placeholder="1" />
+                </div>
                 <div className="form-group">
                   <label>Shape</label>
                   <input type="text" name="shape" value={stone.shape} onChange={(e) => handleStoneChange(stone.id, e)} placeholder="Round, Oval..." />
