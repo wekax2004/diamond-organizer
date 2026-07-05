@@ -44,16 +44,19 @@ const Dashboard = () => {
   }, []);
 
   const handleSaveTask = async (taskData) => {
-    if (taskData.id) {
-      await updateTask(taskData);
-      setEditingTask(null);
-    } else {
-      await addTask(taskData);
-    }
-    // Mobile friendly: after adding/editing, hide form if multiple items exist, 
-    // but here we can just keep the form visible or manage it as needed.
-    if (window.innerWidth < 1024 && !editingTask) {
-        setShowAddForm(false);
+    try {
+      if (taskData.id) {
+        await updateTask(taskData);
+        setEditingTask(null);
+      } else {
+        await addTask(taskData);
+      }
+      if (window.innerWidth < 1024 && !editingTask) {
+          setShowAddForm(false);
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Failed to save task. ' + err.message);
     }
   };
 
