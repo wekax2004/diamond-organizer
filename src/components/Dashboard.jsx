@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import TaskForm from './TaskForm';
 import TaskCard from './TaskCard';
 import { subscribeToTasks, addTask, updateTask, deleteTask } from '../utils/storage';
@@ -60,28 +60,28 @@ const Dashboard = () => {
     }
   };
 
-  const handleToggleStatus = async (taskId) => {
+  const handleToggleStatus = useCallback(async (taskId) => {
     const task = tasks.find(t => t.id === taskId);
     if (task) {
       const updated = { ...task, completed: !task.completed };
       await updateTask(updated);
     }
-  };
+  }, [tasks]);
 
-  const handleDelete = async (taskId) => {
+  const handleDelete = useCallback(async (taskId) => {
     if (window.confirm("Are you sure you want to delete this task?")) {
       await deleteTask(taskId);
     }
-  };
+  }, []);
 
-  const handleEdit = (task) => {
+  const handleEdit = useCallback((task) => {
     setEditingTask(task);
     setShowAddForm(true);
     window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+  }, []);
 
-  const activeTasks = tasks.filter(t => !t.completed);
-  const completedTasks = tasks.filter(t => t.completed);
+  const activeTasks = useMemo(() => tasks.filter(t => !t.completed), [tasks]);
+  const completedTasks = useMemo(() => tasks.filter(t => t.completed), [tasks]);
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -105,21 +105,21 @@ const Dashboard = () => {
     });
   };
 
-  const activeTasksFiltered = filterTasks(activeTasks);
-  const completedTasksFiltered = filterTasks(completedTasks);
+  const activeTasksFiltered = useMemo(() => filterTasks(activeTasks), [activeTasks, searchTerm]);
+  const completedTasksFiltered = useMemo(() => filterTasks(completedTasks), [completedTasks, searchTerm]);
 
-  const calculateTotals = () => {
+  const stats = useMemo(() => {
     let buy = 0;
     let sell = 0;
     activeTasksFiltered.forEach(task => {
       task.stones?.forEach(stone => {
-        if (stone.buyPrice) buy += parseFloat(stone.buyPrice.toString().replace(/,/g, '')) || 0;
-        if (stone.sellPrice) sell += parseFloat(stone.sellPrice.toString().replace(/,/g, '')) || 0;
+        const qty = parseInt(stone.quantity) || 1;
+        if (stone.buyPrice) buy += (parseFloat(stone.buyPrice.toString().replace(/,/g, '')) || 0) * qty;
+        if (stone.sellPrice) sell += (parseFloat(stone.sellPrice.toString().replace(/,/g, '')) || 0) * qty;
       });
     });
     return { buy, sell, profit: sell - buy };
-  };
-  const stats = calculateTotals();
+  }, [activeTasksFiltered]);
 
   return (
     <div>

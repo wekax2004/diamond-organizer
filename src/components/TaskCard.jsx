@@ -1,7 +1,7 @@
 import React from 'react';
 import { CheckCircle, Circle, Edit2, Trash2, Image as ImageIcon } from 'lucide-react';
 
-const TaskCard = ({ task, onToggleStatus, onDelete, onEdit }) => {
+const TaskCard = React.memo(({ task, onToggleStatus, onDelete, onEdit }) => {
   return (
     <div className={`glass-panel task-card ${task.completed ? 'completed' : ''}`}>
       <div className="task-header" style={{ marginBottom: '0.5rem' }}>
@@ -62,6 +62,6 @@ const TaskCard = ({ task, onToggleStatus, onDelete, onEdit }) => {
       </div>
     </div>
   );
-};
+});
 
 export default TaskCard;

@@ -26,5 +26,19 @@ export default defineConfig({
       }
     })
   ],
-  base: '/diamond-organizer/'
+  base: '/diamond-organizer/',
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: (id) => {
+          if (id.includes('node_modules')) {
+            if (id.includes('xlsx')) return 'excel';
+            if (id.includes('firebase')) return 'firebase';
+            if (id.includes('react') || id.includes('lucide')) return 'vendor';
+            return 'vendor'; // Fallback for other node_modules
+          }
+        }
+      }
+    }
+  }
 })

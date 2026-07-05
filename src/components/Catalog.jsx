@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import * as xlsx from 'xlsx';
 import { db } from '../utils/firebase';
 import { collection, writeBatch, doc } from 'firebase/firestore';
 
@@ -17,6 +16,10 @@ export default function Catalog() {
     const reader = new FileReader();
     reader.onload = async (evt) => {
       try {
+        // Dynamically load the massive xlsx library ONLY when they need it!
+        setStatus('Loading Excel Parser...');
+        const xlsx = await import('xlsx');
+        
         const bstr = evt.target.result;
         const wb = xlsx.read(bstr, { type: 'binary' });
         const wsname = wb.SheetNames[0];
