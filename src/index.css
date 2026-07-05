@@ -65,6 +65,32 @@ h1, h2, h3 {
   padding: 1.5rem;
 }
 
+@media (max-width: 768px) {
+  .glass-panel {
+    padding: 1rem;
+  }
+  .app-header {
+    margin-bottom: 1rem !important;
+  }
+  .stat-panel {
+    padding: 1rem !important;
+    gap: 0.5rem !important;
+  }
+  .stat-box .stat-value {
+    font-size: 1.25rem !important;
+  }
+  .search-input {
+    padding: 0.75rem 1rem !important;
+    font-size: 1rem !important;
+  }
+}
+
+.stat-panel {
+  margin-bottom: 1.5rem;
+  padding: 1rem 1.5rem;
+  justify-content: space-between;
+}
+
 /* Form Styles */
 .form-group {
   display: flex;
@@ -177,13 +203,14 @@ button.danger:hover {
   transform: translateY(-4px);
 }
 
-.task-card.completed {
-  opacity: 0.6;
+.status-completed, .status-sold, .status-returned {
+  opacity: 0.8;
 }
 
-.task-card.completed .task-image,
-.task-card.completed .task-details {
-  filter: grayscale(100%);
+.status-completed .task-image,
+.status-sold .task-image,
+.status-returned .task-image {
+  filter: grayscale(80%);
 }
 
 .task-image-container {

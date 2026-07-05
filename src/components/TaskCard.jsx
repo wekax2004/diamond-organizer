@@ -1,14 +1,41 @@
 import React from 'react';
 import { CheckCircle, Circle, Edit2, Trash2, Image as ImageIcon } from 'lucide-react';
 
-const TaskCard = React.memo(({ task, onToggleStatus, onDelete, onEdit }) => {
+const TaskCard = React.memo(({ task, onStatusChange, onDelete, onEdit }) => {
+  const getStatusColor = (status) => {
+    switch(status) {
+      case 'completed': return '#34d399'; // green
+      case 'sold': return '#3b82f6'; // blue
+      case 'returned': return '#f87171'; // red
+      default: return '#94a3b8'; // grey
+    }
+  };
+
   return (
-    <div className={`glass-panel task-card ${task.completed ? 'completed' : ''}`}>
-      <div className="task-header" style={{ marginBottom: '0.5rem' }}>
-        <h3 className="task-title" style={{ fontSize: '1.4rem' }}>{task.title || 'Untitled Task'}</h3>
-        <button className="secondary" style={{ padding: '0.2rem', border: 'none' }} onClick={() => onToggleStatus(task.id)}>
-          {task.completed ? <CheckCircle color="#34d399" /> : <Circle color="#94a3b8" />}
-        </button>
+    <div className={`glass-panel task-card status-${task.status || 'active'}`}>
+      <div className="task-header" style={{ marginBottom: '0.5rem', alignItems: 'center' }}>
+        <h3 className="task-title" style={{ fontSize: '1.4rem', flex: 1 }}>{task.title || 'Untitled Task'}</h3>
+        <select 
+          className="status-dropdown"
+          value={task.status || 'active'} 
+          onChange={(e) => onStatusChange(task.id, e.target.value)}
+          style={{ 
+            width: 'auto', 
+            padding: '0.4rem 0.8rem', 
+            backgroundColor: 'rgba(0,0,0,0.3)', 
+            border: `1px solid ${getStatusColor(task.status)}`,
+            color: getStatusColor(task.status),
+            fontWeight: 'bold',
+            borderRadius: '20px',
+            fontSize: '0.85rem',
+            cursor: 'pointer'
+          }}
+        >
+          <option value="active">Active</option>
+          <option value="completed">Completed</option>
+          <option value="sold">Sold</option>
+          <option value="returned">Returned</option>
+        </select>
       </div>
 
       <div className="task-details" style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>

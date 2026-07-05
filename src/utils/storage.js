@@ -17,7 +17,7 @@ export const addTask = async (task) => {
   const newTask = {
     ...task,
     createdAt: new Date().toISOString(),
-    completed: false
+    status: 'active'
   };
   const docRef = await addDoc(collection(db, "tasks"), newTask);
   return { id: docRef.id, ...newTask };

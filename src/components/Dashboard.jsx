@@ -20,7 +20,7 @@ const Dashboard = () => {
           note: t.note,
           customer: t.customer,
           seller: t.seller,
-          completed: t.completed,
+          status: t.status || (t.completed ? 'completed' : 'active'),
           createdAt: t.createdAt,
           stones: [{
             id: t.id + '-stone',
@@ -60,10 +60,10 @@ const Dashboard = () => {
     }
   };
 
-  const handleToggleStatus = useCallback(async (taskId) => {
+  const handleStatusChange = useCallback(async (taskId, newStatus) => {
     const task = tasks.find(t => t.id === taskId);
     if (task) {
-      const updated = { ...task, completed: !task.completed };
+      const updated = { ...task, status: newStatus };
       await updateTask(updated);
     }
   }, [tasks]);
@@ -80,8 +80,8 @@ const Dashboard = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, []);
 
-  const activeTasks = useMemo(() => tasks.filter(t => !t.completed), [tasks]);
-  const completedTasks = useMemo(() => tasks.filter(t => t.completed), [tasks]);
+  const activeTasks = useMemo(() => tasks.filter(t => t.status === 'active'), [tasks]);
+  const historyTasks = useMemo(() => tasks.filter(t => t.status !== 'active'), [tasks]);
 
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -106,7 +106,7 @@ const Dashboard = () => {
   };
 
   const activeTasksFiltered = useMemo(() => filterTasks(activeTasks), [activeTasks, searchTerm]);
-  const completedTasksFiltered = useMemo(() => filterTasks(completedTasks), [completedTasks, searchTerm]);
+  const historyTasksFiltered = useMemo(() => filterTasks(historyTasks), [historyTasks, searchTerm]);
 
   const stats = useMemo(() => {
     let buy = 0;
@@ -163,7 +163,7 @@ const Dashboard = () => {
         {/* Right Column: Task Lists */}
         <div>
           {/* Stats Panel */}
-          <div className="glass-panel flex-row" style={{ marginBottom: '1.5rem', padding: '1rem 1.5rem', justifyContent: 'space-between' }}>
+          <div className="glass-panel stat-panel flex-row">
             <div className="stat-box">
               <div className="stat-label">Inventory Cost</div>
               <div className="stat-value">${stats.buy.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}</div>
@@ -199,7 +199,7 @@ const Dashboard = () => {
                   <TaskCard 
                     key={task.id} 
                     task={task} 
-                    onToggleStatus={handleToggleStatus}
+                    onStatusChange={handleStatusChange}
                     onDelete={handleDelete}
                     onEdit={handleEdit}
                   />
@@ -210,15 +210,15 @@ const Dashboard = () => {
              <div style={{ marginBottom: '2rem', color: 'var(--text-muted)' }}>No active tasks match your search.</div>
           )}
 
-          {completedTasksFiltered.length > 0 && (
+          {historyTasksFiltered.length > 0 && (
             <div>
-              <h2 style={{ color: 'var(--text-muted)' }}>Completed ({completedTasks.length})</h2>
+              <h2 style={{ color: 'var(--text-muted)' }}>History ({historyTasksFiltered.length})</h2>
               <div className="tasks-grid">
-                {completedTasks.map(task => (
+                {historyTasksFiltered.map(task => (
                   <TaskCard 
                     key={task.id} 
                     task={task} 
-                    onToggleStatus={handleToggleStatus}
+                    onStatusChange={handleStatusChange}
                     onDelete={handleDelete}
                     onEdit={handleEdit}
                   />
