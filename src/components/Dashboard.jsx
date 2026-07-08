@@ -3,14 +3,29 @@ import TaskForm from './TaskForm';
 import TaskCard from './TaskCard';
 import { subscribeToTasks, addTask, updateTask, deleteTask } from '../utils/storage';
 import { auth } from '../utils/firebase';
-import { Download } from 'lucide-react';
+import { Download, Plus, X } from 'lucide-react';
+import Analytics from './Analytics';
 
-const APP_VERSION = "v1.1.1";
+const APP_VERSION = "v1.2.0";
 
 const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
-  const [showAddForm, setShowAddForm] = useState(window.innerWidth >= 1024);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('tasks');
+  const [isOffline, setIsOffline] = useState(!navigator.onLine);
+
+  useEffect(() => {
+    const handleOffline = () => setIsOffline(true);
+    const handleOnline = () => setIsOffline(false);
+    window.addEventListener('offline', handleOffline);
+    window.addEventListener('online', handleOnline);
+    return () => {
+      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener('online', handleOnline);
+    };
+  }, []);
 
   // Subscribe to tasks on mount
   useEffect(() => {
@@ -57,9 +72,7 @@ const Dashboard = () => {
       } else {
         await addTask(taskData);
       }
-      if (window.innerWidth < 1024 && !editingTask) {
-          setShowAddForm(false);
-      }
+      setShowAddForm(false);
     } catch (err) {
       console.error(err);
       alert('Failed to save task. ' + err.message);
@@ -92,8 +105,6 @@ const Dashboard = () => {
 
   const activeTasks = useMemo(() => tasks.filter(t => t.status === 'active'), [tasks]);
   const historyTasks = useMemo(() => tasks.filter(t => t.status !== 'active'), [tasks]);
-
-  const [searchTerm, setSearchTerm] = useState('');
 
   const filterTasks = (taskList) => {
     if (!searchTerm.trim()) return taskList;
@@ -195,46 +206,48 @@ const Dashboard = () => {
             <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 'normal', background: 'rgba(0,0,0,0.05)', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>
               {APP_VERSION}
             </span>
+            {isOffline && (
+              <span style={{ fontSize: '0.75rem', background: '#f87171', color: 'white', padding: '0.2rem 0.5rem', borderRadius: '4px', fontWeight: 'bold' }}>
+                Offline Vault Mode
+              </span>
+            )}
           </h1>
           <p style={{ color: 'var(--text-muted)', margin: '0.25rem 0 0 0' }}>Manage your inventory and tasks beautifully.</p>
         </div>
         
-        {/* Mobile Add Button Toggle & Export */}
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
-          <button onClick={handleExport} disabled={isExporting} style={{ background: '#10b981', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-            <Download size={16} /> {isExporting ? 'Exporting...' : 'Export Report'}
+        <div style={{ display: 'flex', gap: '0.5rem' }}>
+          <button className="secondary" onClick={handleExport} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', background: '#10b981', color: 'white', borderColor: '#10b981' }}>
+            <Download size={16} /> <span className="hide-on-mobile">Export Report</span>
           </button>
-          <button onClick={() => { setShowAddForm(!showAddForm); setEditingTask(null); }} className="secondary">
-            {showAddForm ? 'Hide Form' : '+ Add New Task'}
-          </button>
-          <button 
-            onClick={() => auth.signOut()} 
-            style={{ 
-              background: 'transparent', 
-              border: '1px solid var(--border-color)', 
-              color: 'var(--text-muted)', 
-              padding: '0.6rem 1rem', 
-              borderRadius: '8px', 
-              cursor: 'pointer',
-              fontWeight: 500
-            }}>
+          <button className="secondary" onClick={() => auth.signOut()} style={{ borderColor: 'rgba(239, 68, 68, 0.5)', color: '#f87171' }}>
             Logout
           </button>
         </div>
       </header>
 
-      <div className="dashboard-grid">
-        {/* Left Column: Form */}
-        <div style={{ display: showAddForm ? 'block' : 'none' }}>
-           <TaskForm 
-              onSave={handleSaveTask} 
-              editingTask={editingTask} 
-              onCancel={editingTask ? () => setEditingTask(null) : null}
-            />
-        </div>
+      <div className="tabs">
+        <button className={`tab ${activeTab === 'tasks' ? 'active' : ''}`} onClick={() => setActiveTab('tasks')}>Tasks</button>
+        <button className={`tab ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}>Analytics</button>
+      </div>
 
-        {/* Right Column: Task Lists */}
-        <div>
+      <button onClick={() => { setShowAddForm(!showAddForm); setEditingTask(null); }} className="fab-button" title="Add New Task">
+        {showAddForm ? <X size={24} /> : <Plus size={24} />}
+      </button>
+
+      {activeTab === 'analytics' ? (
+        <Analytics tasks={tasks} />
+      ) : (
+        <>
+          {showAddForm && (
+            <div className="glass-panel" style={{ marginBottom: '2rem' }}>
+              <TaskForm 
+                onSave={handleSaveTask} 
+                editingTask={editingTask} 
+                onCancel={() => setShowAddForm(false)}
+              />
+            </div>
+          )}
+
           {/* Stats Panel */}
           <div className="glass-panel stat-panel flex-row">
             <div className="stat-box">
@@ -253,7 +266,6 @@ const Dashboard = () => {
             </div>
           </div>
 
-          {/* Search Bar */}
           <div style={{ marginBottom: '2rem' }}>
             <input 
               type="text" 
@@ -306,8 +318,8 @@ const Dashboard = () => {
               <p style={{ color: 'var(--text-muted)' }}>Use the form to add your first diamond task.</p>
             </div>
           )}
-        </div>
-      </div>
+        </>
+      )}
     </div>
   );
 };

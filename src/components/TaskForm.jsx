@@ -3,8 +3,9 @@ import { parseFreeText, parseFreeTextWithGemini } from '../utils/parser';
 import { fileToBase64 } from '../utils/storage';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../utils/firebase';
-import { Image as ImageIcon, Sparkles, X, Plus } from 'lucide-react';
+import { Image as ImageIcon, Sparkles, X, Plus, Scan } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
+import BarcodeScanner from './BarcodeScanner';
 
 const emptyStone = () => ({
   id: uuidv4(),
@@ -38,6 +39,7 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
   const [freeText, setFreeText] = useState('');
   const [mode, setMode] = useState(editingTask ? 'manual' : 'freetext');
   const [isParsing, setIsParsing] = useState(false);
+  const [activeScannerId, setActiveScannerId] = useState(null);
   const fileInputRefs = useRef({});
 
   useEffect(() => {
@@ -268,6 +270,15 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
         </div>
       ) : (
         <form onSubmit={handleSubmit}>
+        {activeScannerId && (
+          <BarcodeScanner 
+            onScan={(text) => {
+              handleStoneChange(activeScannerId, { target: { name: 'certNumber', value: text }});
+              setActiveScannerId(null);
+            }} 
+            onClose={() => setActiveScannerId(null)} 
+          />
+        )}
           
           <div className="form-group">
             <label>Task Title / Main Description *</label>
@@ -362,9 +373,17 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
                   <label>Cut</label>
                   <input type="text" name="cut" value={stone.cut} onChange={(e) => handleStoneChange(stone.id, e)} placeholder="Excellent..." />
                 </div>
-                <div className="form-group">
+              </div>
+
+              <div className="flex-row" style={{ marginTop: '1rem' }}>
+                <div className="form-group" style={{ flex: 2 }}>
                   <label>Certificate #</label>
-                  <input type="text" name="certNumber" value={stone.certNumber} onChange={(e) => handleStoneChange(stone.id, e)} placeholder="GIA..." />
+                  <div style={{ display: 'flex', gap: '0.5rem' }}>
+                    <input type="text" name="certNumber" value={stone.certNumber} onChange={(e) => handleStoneChange(stone.id, e)} placeholder="GIA 123456789" style={{ flex: 1 }} />
+                    <button type="button" className="secondary" onClick={() => setActiveScannerId(stone.id)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                      <Scan size={16} /> Scan
+                    </button>
+                  </div>
                 </div>
               </div>
 

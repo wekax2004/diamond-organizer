@@ -83,11 +83,14 @@ const TaskCard = React.memo(({ task, onStatusChange, onDelete, onEdit }) => {
         )}
       </div>
 
-      <div className="task-details" style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
-        {task.seller && <div><strong>From:</strong> {task.seller}</div>}
-        {task.customer && <div><strong>To:</strong> {task.customer}</div>}
-        {task.note && <div style={{ gridColumn: 'span 2' }}><strong>Notes:</strong> {task.note}</div>}
-      </div>
+      <details style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem', color: 'var(--text-muted)' }}>
+        <summary style={{ cursor: 'pointer', fontWeight: 'bold', color: 'var(--primary-color)', marginBottom: '0.5rem', outline: 'none' }}>Show More Info</summary>
+        <div className="task-details" style={{ marginTop: '0.5rem' }}>
+          {task.seller && <div><strong>From:</strong> {task.seller}</div>}
+          {task.customer && <div><strong>To:</strong> {task.customer}</div>}
+          {task.note && <div style={{ gridColumn: 'span 2' }}><strong>Notes:</strong> {task.note}</div>}
+        </div>
+      </details>
 
       {task.stones && task.stones.map((stone, idx) => (
         <div key={stone.id} style={{ marginBottom: '1.5rem', background: 'rgba(0,0,0,0.03)', padding: '1rem', borderRadius: '8px' }}>
@@ -116,11 +119,14 @@ const TaskCard = React.memo(({ task, onStatusChange, onDelete, onEdit }) => {
             {stone.cut && <span className="badge">Cut: {stone.cut}</span>}
           </div>
 
-          <div className="task-details" style={{ marginBottom: 0 }}>
-            {stone.buyPrice && <div><strong>Buy:</strong> ${stone.buyPrice}</div>}
-            {stone.sellPrice && <div><strong>Sell:</strong> ${stone.sellPrice}</div>}
-            {stone.certNumber && <div style={{ gridColumn: 'span 2' }}><strong>Cert:</strong> {stone.certNumber}</div>}
-          </div>
+          <details style={{ marginTop: '0.5rem' }}>
+            <summary style={{ cursor: 'pointer', fontSize: '0.8rem', color: 'var(--primary-color)' }}>Financials & Cert</summary>
+            <div className="task-details" style={{ marginTop: '0.5rem', marginBottom: 0 }}>
+              {stone.buyPrice && <div><strong>Buy:</strong> ${stone.buyPrice}</div>}
+              {stone.sellPrice && <div><strong>Sell:</strong> ${stone.sellPrice}</div>}
+              {stone.certNumber && <div style={{ gridColumn: 'span 2' }}><strong>Cert:</strong> {stone.certNumber}</div>}
+            </div>
+          </details>
         </div>
       ))}
 
