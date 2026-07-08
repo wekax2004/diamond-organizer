@@ -5,7 +5,7 @@ import { subscribeToTasks, addTask, updateTask, deleteTask } from '../utils/stor
 import { auth } from '../utils/firebase';
 import { Download } from 'lucide-react';
 
-const APP_VERSION = "v1.1.0";
+const APP_VERSION = "v1.1.1";
 
 const Dashboard = () => {
   const [tasks, setTasks] = useState([]);

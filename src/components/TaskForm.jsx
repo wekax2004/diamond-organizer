@@ -106,6 +106,7 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
           note: freeText,
           customer: firstStone.customer || prev.customer,
           seller: firstStone.seller || prev.seller,
+          dueDate: firstStone.dueDate || prev.dueDate,
           stones: stones
         }));
       } else {

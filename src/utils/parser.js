@@ -148,12 +148,13 @@ Each object should have these string fields (leave empty string if not found, DO
 - seller (often after "from")
 - customer (often after "for" or "to")
 - certNumber
+- dueDate (if a date/deadline like "tomorrow" is mentioned, output it exactly in YYYY-MM-DDTHH:mm format, assume 12:00 if no time is specified. Today is ${new Date().toISOString().split('T')[0]})
 
 Input: "${text}"
 
 Return ONLY a valid JSON array. Do not include markdown blocks like \`\`\`json. E.g.
 [
-  { "quantity": "1", "size": "1", "shape": "Round", "color": "D", "clarity": "VS1", "cut": "", "buyPrice": "5000", "sellPrice": "", "seller": "John", "customer": "Guy", "certNumber": "" }
+  { "quantity": "1", "size": "1", "shape": "Round", "color": "D", "clarity": "VS1", "cut": "", "buyPrice": "5000", "sellPrice": "", "seller": "John", "customer": "Guy", "certNumber": "", "dueDate": "" }
 ]`;
 
   const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
