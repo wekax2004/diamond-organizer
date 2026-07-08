@@ -3,6 +3,7 @@ import TaskForm from './TaskForm';
 import TaskCard from './TaskCard';
 import { subscribeToTasks, addTask, updateTask, deleteTask } from '../utils/storage';
 import { auth } from '../utils/firebase';
+import { Download } from 'lucide-react';
 
 const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
@@ -21,6 +22,9 @@ const Dashboard = () => {
           customer: t.customer,
           seller: t.seller,
           status: t.status || (t.completed ? 'completed' : 'active'),
+          statusUpdatedAt: t.statusUpdatedAt || null,
+          taskDate: t.taskDate || t.createdAt?.split('T')[0] || '',
+          dueDate: t.dueDate || '',
           createdAt: t.createdAt,
           stones: [{
             id: t.id + '-stone',
@@ -63,7 +67,11 @@ const Dashboard = () => {
   const handleStatusChange = useCallback(async (taskId, newStatus) => {
     const task = tasks.find(t => t.id === taskId);
     if (task) {
-      const updated = { ...task, status: newStatus };
+      const updated = { 
+        ...task, 
+        status: newStatus,
+        statusUpdatedAt: new Date().toISOString()
+      };
       await updateTask(updated);
     }
   }, [tasks]);
@@ -121,6 +129,61 @@ const Dashboard = () => {
     return { buy, sell, profit: sell - buy };
   }, [activeTasksFiltered]);
 
+  const [isExporting, setIsExporting] = useState(false);
+
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const xlsx = await import('xlsx');
+      const rows = [];
+      
+      tasks.forEach(task => {
+        const baseTaskInfo = {
+          'Task Title': task.title,
+          'Status': task.status,
+          'Task Date': task.taskDate || '',
+          'Due Date': task.dueDate ? new Date(task.dueDate).toLocaleString() : '',
+          'Status Last Changed': task.statusUpdatedAt ? new Date(task.statusUpdatedAt).toLocaleString() : '',
+          'Customer (To)': task.customer || '',
+          'Seller (From)': task.seller || '',
+          'Notes': task.note || ''
+        };
+
+        if (task.stones && task.stones.length > 0) {
+          task.stones.forEach((stone, idx) => {
+            rows.push({
+              ...baseTaskInfo,
+              'Stone #': idx + 1,
+              'Quantity': stone.quantity || 1,
+              'Lot Name': stone.lotName || '',
+              'Shape': stone.shape || '',
+              'Carat Size': stone.size || '',
+              'Color': stone.color || '',
+              'Clarity': stone.clarity || '',
+              'Cut': stone.cut || '',
+              'Cert #': stone.certNumber || '',
+              'Buy Price': stone.buyPrice || '',
+              'Sell Price': stone.sellPrice || ''
+            });
+          });
+        } else {
+          rows.push(baseTaskInfo);
+        }
+      });
+
+      const ws = xlsx.utils.json_to_sheet(rows);
+      const wb = xlsx.utils.book_new();
+      xlsx.utils.book_append_sheet(wb, ws, "Tasks");
+      const dateStr = new Date().toISOString().split('T')[0];
+      xlsx.writeFile(wb, `Diamond_Tasks_Export_${dateStr}.xlsx`);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to export to Excel.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div>
       <header className="app-header">
@@ -129,8 +192,11 @@ const Dashboard = () => {
           <p style={{ color: 'var(--text-muted)', margin: 0 }}>Manage your inventory and tasks beautifully.</p>
         </div>
         
-        {/* Mobile Add Button Toggle */}
-        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+        {/* Mobile Add Button Toggle & Export */}
+        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button onClick={handleExport} disabled={isExporting} style={{ background: '#10b981', display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+            <Download size={16} /> {isExporting ? 'Exporting...' : 'Export Report'}
+          </button>
           <button onClick={() => { setShowAddForm(!showAddForm); setEditingTask(null); }} className="secondary">
             {showAddForm ? 'Hide Form' : '+ Add New Task'}
           </button>

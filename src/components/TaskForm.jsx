@@ -21,11 +21,15 @@ const emptyStone = () => ({
   images: []
 });
 
+const getTodayDate = () => new Date().toISOString().split('T')[0];
+
 const emptyForm = () => ({
   title: '',
   note: '',
   customer: '',
   seller: '',
+  taskDate: getTodayDate(),
+  dueDate: '',
   stones: [emptyStone()]
 });
 
@@ -267,6 +271,17 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
           <div className="form-group">
             <label>Task Title / Main Description *</label>
             <input type="text" name="title" value={formData.title} onChange={handleGeneralChange} placeholder="E.g., Client Order: 2ct Round & 3ct Oval" />
+          </div>
+
+          <div className="flex-row">
+            <div className="form-group">
+              <label>Task Date</label>
+              <input type="date" name="taskDate" value={formData.taskDate || ''} onChange={handleGeneralChange} />
+            </div>
+            <div className="form-group">
+              <label>Due Date & Time (Optional)</label>
+              <input type="datetime-local" name="dueDate" value={formData.dueDate || ''} onChange={handleGeneralChange} />
+            </div>
           </div>
 
           <div className="flex-row">

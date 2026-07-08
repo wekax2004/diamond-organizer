@@ -1,5 +1,5 @@
 import React from 'react';
-import { CheckCircle, Circle, Edit2, Trash2, Image as ImageIcon } from 'lucide-react';
+import { CheckCircle, Circle, Edit2, Trash2, Image as ImageIcon, Calendar, CalendarPlus, Clock } from 'lucide-react';
 
 const TaskCard = React.memo(({ task, onStatusChange, onDelete, onEdit }) => {
   const getStatusColor = (status) => {
@@ -9,6 +9,38 @@ const TaskCard = React.memo(({ task, onStatusChange, onDelete, onEdit }) => {
       case 'returned': return '#f87171'; // red
       default: return '#94a3b8'; // grey
     }
+  };
+
+  const handleAddToCalendar = () => {
+    if (!task.dueDate) return;
+    
+    // Format dates to YYYYMMDDTHHMMSSZ
+    const startDate = new Date(task.dueDate);
+    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // 1 hour duration
+    
+    const formatDate = (date) => {
+      return date.toISOString().replace(/[-:]/g, '').split('.')[0] + 'Z';
+    };
+
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'BEGIN:VEVENT',
+      `DTSTART:${formatDate(startDate)}`,
+      `DTEND:${formatDate(endDate)}`,
+      `SUMMARY:${task.title || 'Diamond Task'}`,
+      `DESCRIPTION:${(task.note || '').replace(/\n/g, '\\n')}`,
+      'END:VEVENT',
+      'END:VCALENDAR'
+    ].join('\n');
+
+    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = `${(task.title || 'task').replace(/[^a-z0-9]/gi, '_').toLowerCase()}.ics`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
   };
 
   return (
@@ -36,6 +68,19 @@ const TaskCard = React.memo(({ task, onStatusChange, onDelete, onEdit }) => {
           <option value="sold">Sold</option>
           <option value="returned">Returned</option>
         </select>
+      </div>
+
+      <div style={{ display: 'flex', gap: '1rem', marginBottom: '1rem', flexWrap: 'wrap', fontSize: '0.85rem' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: 'var(--text-muted)' }}>
+          <Calendar size={14} /> 
+          <span>Created: {task.taskDate || (task.createdAt ? new Date(task.createdAt).toLocaleDateString() : '')}</span>
+        </div>
+        {task.dueDate && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '0.3rem', color: new Date(task.dueDate) < new Date() ? '#f87171' : '#fbbf24', fontWeight: 'bold' }}>
+            <Clock size={14} /> 
+            <span>Due: {new Date(task.dueDate).toLocaleString([], { dateStyle: 'short', timeStyle: 'short' })}</span>
+          </div>
+        )}
       </div>
 
       <div className="task-details" style={{ marginBottom: '1.5rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '1rem' }}>
@@ -79,7 +124,12 @@ const TaskCard = React.memo(({ task, onStatusChange, onDelete, onEdit }) => {
         </div>
       ))}
 
-      <div className="task-actions" style={{ marginTop: 'auto' }}>
+      <div className="task-actions" style={{ marginTop: 'auto', flexWrap: 'wrap' }}>
+        {task.dueDate && (
+          <button className="secondary" onClick={handleAddToCalendar} style={{ flex: '1 1 100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+            <CalendarPlus size={16} /> Add Reminder
+          </button>
+        )}
         <button className="secondary" onClick={() => onEdit(task)} style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.5rem' }}>
           <Edit2 size={16} /> Edit
         </button>
