@@ -206,11 +206,11 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!formData.title) {
-      alert("Please provide a Task Title.");
-      return;
+    const finalData = { ...formData };
+    if (!finalData.title || !finalData.title.trim()) {
+      finalData.title = 'Untitled Task';
     }
-    onSave(formData);
+    onSave(finalData);
     if (!editingTask) {
       setFormData(emptyForm());
       setFreeText('');
@@ -266,7 +266,7 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
           
           <div className="form-group">
             <label>Task Title / Main Description *</label>
-            <input type="text" name="title" value={formData.title} onChange={handleGeneralChange} required placeholder="E.g., Client Order: 2ct Round & 3ct Oval" />
+            <input type="text" name="title" value={formData.title} onChange={handleGeneralChange} placeholder="E.g., Client Order: 2ct Round & 3ct Oval" />
           </div>
 
           <div className="flex-row">
@@ -369,7 +369,6 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
                   type="file" 
                   accept="image/*" 
                   multiple
-                  capture="environment"
                   onChange={(e) => handleImageChange(stone.id, e)} 
                   ref={el => fileInputRefs.current[stone.id] = el}
                   style={{ display: 'none' }}
