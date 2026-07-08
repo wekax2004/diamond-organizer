@@ -303,7 +303,7 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
           <h3 style={{ marginTop: '2rem', borderBottom: '1px solid var(--border-color)', paddingBottom: '0.5rem' }}>Stones ({formData.stones.length})</h3>
 
           {formData.stones.map((stone, index) => (
-            <div key={stone.id} style={{ background: 'rgba(0,0,0,0.1)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', position: 'relative' }}>
+            <div key={stone.id} style={{ background: 'rgba(0,0,0,0.03)', padding: '1rem', borderRadius: '8px', marginBottom: '1rem', position: 'relative' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
                 <h4 style={{ margin: 0, color: 'var(--text-muted)' }}>Stone #{index + 1}</h4>
                 {formData.stones.length > 1 && (
@@ -311,7 +311,7 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
                 )}
               </div>
 
-              <div className="form-group" style={{ background: 'rgba(99, 102, 241, 0.1)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(99, 102, 241, 0.3)' }}>
+              <div className="form-group" style={{ background: 'rgba(99, 102, 241, 0.05)', padding: '1rem', borderRadius: '8px', border: '1px solid rgba(99, 102, 241, 0.2)' }}>
                 <label style={{ color: 'var(--primary-color)' }}>Auto-Fill from Excel Catalog</label>
                 <div style={{ display: 'flex', gap: '0.5rem' }}>
                   <input 
@@ -320,7 +320,7 @@ const TaskForm = ({ onSave, onCancel, editingTask = null }) => {
                     value={stone.lotName || ''} 
                     onChange={(e) => handleStoneChange(stone.id, e)} 
                     placeholder="Enter Lot Name (e.g. BR7370)" 
-                    style={{ flex: 1, background: 'rgba(0,0,0,0.2)' }}
+                    style={{ flex: 1, background: 'rgba(255,255,255,0.9)' }}
                   />
                   <button 
                     type="button" 

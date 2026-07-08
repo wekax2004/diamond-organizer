@@ -54,7 +54,7 @@ const TaskCard = React.memo(({ task, onStatusChange, onDelete, onEdit }) => {
           style={{ 
             width: 'auto', 
             padding: '0.4rem 0.8rem', 
-            backgroundColor: 'rgba(0,0,0,0.3)', 
+            backgroundColor: 'rgba(255,255,255,0.9)', 
             border: `1px solid ${getStatusColor(task.status)}`,
             color: getStatusColor(task.status),
             fontWeight: 'bold',
@@ -90,7 +90,7 @@ const TaskCard = React.memo(({ task, onStatusChange, onDelete, onEdit }) => {
       </div>
 
       {task.stones && task.stones.map((stone, idx) => (
-        <div key={stone.id} style={{ marginBottom: '1.5rem', background: 'rgba(0,0,0,0.2)', padding: '1rem', borderRadius: '8px' }}>
+        <div key={stone.id} style={{ marginBottom: '1.5rem', background: 'rgba(0,0,0,0.03)', padding: '1rem', borderRadius: '8px' }}>
           <h4 style={{ margin: '0 0 0.5rem 0', color: 'var(--text-muted)' }}>Stone {task.stones.length > 1 ? `#${idx + 1}` : ''}</h4>
           
           {stone.images && stone.images.length > 0 ? (

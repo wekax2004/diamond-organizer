@@ -3,9 +3,9 @@
   line-height: 1.5;
   font-weight: 400;
 
-  color-scheme: dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #0d1117;
+  color-scheme: light;
+  color: #1e293b;
+  background-color: #f8fafc;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -14,13 +14,13 @@
 
   --primary-color: #3b82f6;
   --primary-hover: #2563eb;
-  --bg-color: #0f172a;
-  --card-bg: rgba(30, 41, 59, 0.7);
-  --border-color: rgba(255, 255, 255, 0.1);
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --glass-border: rgba(255, 255, 255, 0.15);
-  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --bg-color: #f1f5f9;
+  --card-bg: rgba(255, 255, 255, 0.85);
+  --border-color: rgba(0, 0, 0, 0.1);
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --glass-border: rgba(255, 255, 255, 0.6);
+  --glass-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.05);
 }
 
 * {
@@ -33,7 +33,7 @@ body {
   place-items: flex-start;
   min-width: 320px;
   min-height: 100vh;
-  background: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+  background: radial-gradient(circle at top, #f8fafc 0%, #e2e8f0 100%);
 }
 
 #root {
@@ -66,22 +66,50 @@ h1, h2, h3 {
 }
 
 @media (max-width: 768px) {
+  #root {
+    padding: 0.5rem;
+  }
   .glass-panel {
     padding: 1rem;
+    border-radius: 12px;
   }
   .app-header {
     margin-bottom: 1rem !important;
   }
   .stat-panel {
-    padding: 1rem !important;
-    gap: 0.5rem !important;
+    padding: 0.75rem !important;
+    gap: 0.25rem !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto;
+  }
+  .stat-box {
+    min-width: 100px;
   }
   .stat-box .stat-value {
-    font-size: 1.25rem !important;
+    font-size: 1.1rem !important;
+  }
+  .stat-box .stat-label {
+    font-size: 0.7rem !important;
   }
   .search-input {
     padding: 0.75rem 1rem !important;
     font-size: 1rem !important;
+  }
+  .task-header h3 {
+    font-size: 1.1rem !important;
+  }
+  .task-details {
+    font-size: 0.8rem !important;
+    grid-template-columns: 1fr !important;
+    gap: 0.25rem !important;
+  }
+  .badge {
+    padding: 0.15rem 0.4rem !important;
+    font-size: 0.7rem !important;
+  }
+  .task-actions button {
+    font-size: 0.85rem;
+    padding: 0.4rem;
   }
 }
 
@@ -106,7 +134,7 @@ h1, h2, h3 {
 
 input, textarea, select {
   width: 100%;
-  background: rgba(15, 23, 42, 0.6);
+  background: rgba(255, 255, 255, 0.9);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   padding: 0.75rem;
@@ -216,7 +244,7 @@ button.danger:hover {
 .task-image-container {
   width: 100%;
   height: 200px;
-  background-color: rgba(0, 0, 0, 0.2);
+  background-color: rgba(0, 0, 0, 0.05);
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 1rem;
@@ -262,7 +290,7 @@ button.danger:hover {
 }
 
 .badge {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.05);
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
   font-size: 0.75rem;
@@ -364,7 +392,7 @@ button.danger:hover {
 .search-input:focus {
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-  background: rgba(30, 41, 59, 0.9);
+  background: rgba(255, 255, 255, 1);
 }
 
 .tabs {
