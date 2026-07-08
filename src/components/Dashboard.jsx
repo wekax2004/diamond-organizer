@@ -5,6 +5,8 @@ import { subscribeToTasks, addTask, updateTask, deleteTask } from '../utils/stor
 import { auth } from '../utils/firebase';
 import { Download } from 'lucide-react';
 
+const APP_VERSION = "v1.1.0";
+
 const Dashboard = () => {
   const [tasks, setTasks] = useState([]);
   const [editingTask, setEditingTask] = useState(null);
@@ -188,8 +190,13 @@ const Dashboard = () => {
     <div>
       <header className="app-header">
         <div>
-          <h1>Diamond Organizer</h1>
-          <p style={{ color: 'var(--text-muted)', margin: 0 }}>Manage your inventory and tasks beautifully.</p>
+          <h1 style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+            Diamond Organizer 
+            <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 'normal', background: 'rgba(0,0,0,0.05)', padding: '0.2rem 0.4rem', borderRadius: '4px' }}>
+              {APP_VERSION}
+            </span>
+          </h1>
+          <p style={{ color: 'var(--text-muted)', margin: '0.25rem 0 0 0' }}>Manage your inventory and tasks beautifully.</p>
         </div>
         
         {/* Mobile Add Button Toggle & Export */}
